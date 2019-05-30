@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -25,6 +27,7 @@ android {
 dependencies {
 //    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 //old plugin didn't work with gradle 4.4+ so this fork is where i'm at.
@@ -49,4 +52,7 @@ publish {
     artifactId = 'recordable-surfaceview'
     desc = 'A drop-in replacement for GLSurfaceView that can be used to record to an mp4 movie.'
     website = 'https://github.com/UncorkedStudios/recordablesurfaceview'
+}
+repositories {
+    mavenCentral()
 }
