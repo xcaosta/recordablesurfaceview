@@ -1,4 +1,4 @@
-package com.example.android.opengl;
+package com.example.recordablesurfaceview;
 
 import android.Manifest;
 import android.app.Activity;

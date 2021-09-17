@@ -1,13 +1,14 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdk 29
 
     defaultConfig {
-        applicationId "com.example.android.opengl"
-        minSdkVersion 27
-        targetSdkVersion 30
+        applicationId "com.example.recordablesurfaceview"
+        minSdk 24
+        targetSdk 29
     }
 
     buildTypes {
@@ -19,7 +20,5 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation project(path: ':recordablesurfaceview')
+    implementation 'androidx.appcompat:appcompat:1.2.0'
 }

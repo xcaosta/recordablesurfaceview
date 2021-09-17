@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.opengl;
-
-import com.uncorkedstudios.android.view.recordablesurfaceview.RecordableSurfaceView;
+package com.example.recordablesurfaceview;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -26,15 +24,15 @@ import android.view.MotionEvent;
  * This view can also be used to capture touch events, such as a user
  * interacting with drawn objects.
  */
-public class MyGLSurfaceView extends RecordableSurfaceView implements RecordableSurfaceView.RendererCallbacks {
+public class MySurfaceView extends RecordableSurfaceView implements RecordableSurfaceView.RendererCallbacks {
 
-    private final MyGLRenderer mRenderer;
+    private final MyRenderer mRenderer;
 
-    public MyGLSurfaceView(Context context) {
+    public MySurfaceView(Context context) {
         super(context);
 
         // Set the Renderer for drawing on the GLSurfaceView
-        mRenderer = new MyGLRenderer();
+        mRenderer = new MyRenderer();
         setRendererCallbacks(this);
     }
 

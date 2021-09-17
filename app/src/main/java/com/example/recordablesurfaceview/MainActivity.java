@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.opengl;
-
-import com.uncorkedstudios.android.view.recordablesurfaceview.RecordableSurfaceView;
+package com.example.recordablesurfaceview;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -33,7 +31,7 @@ import java.util.Date;
 
 import static android.content.ContentValues.TAG;
 
-public class OpenGLES20Activity extends Activity {
+public class MainActivity extends Activity {
 
     private RecordableSurfaceView mGLView;
 
@@ -48,7 +46,7 @@ public class OpenGLES20Activity extends Activity {
 
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity
-        mGLView = new MyGLSurfaceView(this);
+        mGLView = new MySurfaceView(this);
         setContentView(mGLView);
     }
 
@@ -72,16 +70,20 @@ public class OpenGLES20Activity extends Activity {
         if (PermissionsHelper.hasPermissions(this)) {
             // Note that order matters - see the note in onPause(), the reverse applies here.
             mGLView.resume();
-            try {
-                mOutputFile = createVideoOutputFile();
-                android.graphics.Point size = new android.graphics.Point();
-                getWindowManager().getDefaultDisplay().getRealSize(size);
-                mGLView.initRecorder(mOutputFile, size.x, size.y, null, null);
-            } catch (IOException ioex) {
-                Log.e(TAG, "Couldn't re-init recording", ioex);
-            }
+            initRecorder();
         } else {
             PermissionsHelper.requestPermissions(this);
+        }
+    }
+
+    private void initRecorder() {
+        try {
+            mOutputFile = createVideoOutputFile();
+            android.graphics.Point size = new android.graphics.Point();
+            getWindowManager().getDefaultDisplay().getRealSize(size);
+            mGLView.initRecorder(mOutputFile, size.x, size.y, null, null);
+        } catch (IOException ioex) {
+            Log.e(TAG, "Couldn't re-init recording", ioex);
         }
     }
 
@@ -121,14 +123,7 @@ public class OpenGLES20Activity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // Note that order matters - see the note in onPause(), the reverse applies here.
         mGLView.resume();
-        try {
-            mOutputFile = createVideoOutputFile();
-            android.graphics.Point size = new android.graphics.Point();
-            getWindowManager().getDefaultDisplay().getRealSize(size);
-            mGLView.initRecorder(mOutputFile, size.x, size.y, null, null);
-        } catch (IOException ioex) {
-            Log.e(TAG, "Couldn't re-init recording", ioex);
-        }
+        initRecorder();
     }
 
     @Override
@@ -137,7 +132,7 @@ public class OpenGLES20Activity extends Activity {
             mGLView.stopRecording();
 
             Uri contentUri = FileProvider.getUriForFile(this,
-                    "com.example.android.opengl.fileprovider", mOutputFile);
+                    "com.example.recordablesurfaceview.fileprovider", mOutputFile);
 
             share(contentUri);
 
@@ -155,19 +150,15 @@ public class OpenGLES20Activity extends Activity {
                 Log.e(TAG, "Couldn't re-init recording", ioex);
             }
             item.setTitle("Record");
-
         } else {
-
             mGLView.startRecording();
             Log.v(TAG, "Recording Started");
 
             item.setTitle("Stop");
             mIsRecording = true;
-
         }
         return true;
     }
-
 
     private void share(Uri contentUri) {
         Intent shareIntent = new Intent();
@@ -176,7 +167,5 @@ public class OpenGLES20Activity extends Activity {
         shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "Share with"));
-
     }
-
 }
