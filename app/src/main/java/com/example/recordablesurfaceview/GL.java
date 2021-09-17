@@ -3355,7 +3355,7 @@ public class GL {
         String name, mArgs = "";
 
         Function(String name, Object... args) {
-            //ASSERT(Thread.currentThread().getId() == glTID);
+            ASSERT(Thread.currentThread().getId() == glTID);
             this.name = name;
             for(Object arg : args) {
                 if (mArgs.isEmpty()) {
