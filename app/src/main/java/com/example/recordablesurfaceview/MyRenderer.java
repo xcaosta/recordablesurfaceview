@@ -53,6 +53,11 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         mTriangle = new Triangle();
+        // Enable depth testing for hidden-surface elimination.
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
+        // Enable not drawing out of view port
+        GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
     }
 
     @Override
