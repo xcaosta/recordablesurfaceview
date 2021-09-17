@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         // If your OpenGL application is memory intensive,
         // you should consider de-allocating objects that
         // consume significant memory here.
-        mGLView.pause();
+        mGLView.onPause();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
 
         if (PermissionsHelper.hasPermissions(this)) {
             // Note that order matters - see the note in onPause(), the reverse applies here.
-            mGLView.resume();
+            mGLView.onResume();
             initRecorder();
         } else {
             PermissionsHelper.requestPermissions(this);
@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
             @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // Note that order matters - see the note in onPause(), the reverse applies here.
-        mGLView.resume();
+        mGLView.onResume();
         initRecorder();
     }
 

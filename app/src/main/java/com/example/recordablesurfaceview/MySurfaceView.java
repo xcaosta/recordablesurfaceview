@@ -24,7 +24,7 @@ import android.view.MotionEvent;
  * This view can also be used to capture touch events, such as a user
  * interacting with drawn objects.
  */
-public class MySurfaceView extends RecordableSurfaceView implements RecordableSurfaceView.RendererCallbacks {
+public class MySurfaceView extends RecordableSurfaceView {
 
     private final MyRenderer mRenderer;
 
@@ -33,7 +33,7 @@ public class MySurfaceView extends RecordableSurfaceView implements RecordableSu
 
         // Set the Renderer for drawing on the GLSurfaceView
         mRenderer = new MyRenderer();
-        setRendererCallbacks(this);
+        setRenderer(mRenderer);
     }
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
@@ -74,35 +74,5 @@ public class MySurfaceView extends RecordableSurfaceView implements RecordableSu
         mPreviousX = x;
         mPreviousY = y;
         return true;
-    }
-
-    @Override
-    public void onSurfaceCreated() {
-        mRenderer.onSurfaceCreated(null, null);
-    }
-
-    @Override
-    public void onSurfaceChanged(int width, int height) {
-        mRenderer.onSurfaceChanged(null, width, height);
-    }
-
-    @Override
-    public void onSurfaceDestroyed() {
-
-    }
-
-    @Override
-    public void onContextCreated() {
-
-    }
-
-    @Override
-    public void onPreDrawFrame() {
-
-    }
-
-    @Override
-    public void onDrawFrame() {
-        mRenderer.onDrawFrame(null);
     }
 }

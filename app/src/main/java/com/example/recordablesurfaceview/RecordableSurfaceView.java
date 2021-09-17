@@ -27,14 +27,12 @@ import static com.example.recordablesurfaceview.GL.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,7 +87,7 @@ public class RecordableSurfaceView extends SurfaceView {
 
     private AtomicBoolean mHasGLContext = new AtomicBoolean(false);
 
-    private WeakReference<RendererCallbacks> mRendererCallbacksWeakReference;
+    private GLSurfaceView.Renderer mRenderer;
 
     private AtomicBoolean mSizeChange = new AtomicBoolean(false);
 
@@ -161,7 +159,7 @@ public class RecordableSurfaceView extends SurfaceView {
     /**
      * Pauses the render thread.
      */
-    public void pause() {
+    public void onPause() {
         mPaused = true;
     }
 
@@ -171,7 +169,7 @@ public class RecordableSurfaceView extends SurfaceView {
      * <p>
      * This method is useful for use in conjunction with the Activity lifecycle
      */
-    public void resume() {
+    public void onResume() {
         doSetup();
         mPaused = false;
     }
@@ -383,29 +381,24 @@ public class RecordableSurfaceView extends SurfaceView {
     }
 
     /**
-     * Returns the reference (if any) to the {@link RendererCallbacks}
+     * Returns the reference (if any) to the {@link Renderer}
      *
      * @return the callbacks if registered
-     * @see RendererCallbacks
+     * @see GLSurfaceView.Renderer
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    public RendererCallbacks getRendererCallbacks() {
-        if (mRendererCallbacksWeakReference != null) {
-            return mRendererCallbacksWeakReference.get();
-        }
-
-        return null;
+    public GLSurfaceView.Renderer getRenderer() {
+        return mRenderer;
     }
 
     /**
-     * Add a {@link RendererCallbacks} object to handle rendering. Not setting one of these is not
+     * Add a {@link GLSurfaceView.Renderer} object to handle rendering. Not setting one of these is not
      * necessarily an error, but is usually necessary.
      *
-     * @param surfaceRendererCallbacks - the object to call back to
+     * @param renderer - the object to call back to
      */
-    public void setRendererCallbacks(RendererCallbacks surfaceRendererCallbacks) {
-
-        mRendererCallbacksWeakReference = new WeakReference<>(surfaceRendererCallbacks);
+    public void setRenderer(GLSurfaceView.Renderer renderer) {
+        mRenderer = renderer;
     }
 
 
@@ -419,54 +412,6 @@ public class RecordableSurfaceView extends SurfaceView {
             mARRenderThread.mRunnableQueue.add(runnable);
         }
     }
-
-    /**
-     * Lifecycle events for the SurfaceView and renderer. These callbacks (unless specified)
-     * are executed on the GL thread.
-     */
-    public interface RendererCallbacks {
-
-        /**
-         * The surface has been created and bound to the GL context.
-         * <p>
-         * A GL context is guaranteed to exist when this function is called.
-         */
-        void onSurfaceCreated();
-
-        /**
-         * The surface has changed width or height.
-         * <p>
-         * This callback will only be called when there is a change to either or both params
-         *
-         * @param width  width of the surface
-         * @param height height of the surface
-         */
-        void onSurfaceChanged(int width, int height);
-
-        /**
-         * Called just before the GL Context is torn down.
-         */
-        void onSurfaceDestroyed();
-
-
-        /**
-         * Called when the GL context has been created and has been bound.
-         */
-        void onContextCreated();
-
-        /**
-         * Called before onDrawFrame, each time as a hook to adjust a global clock for rendering,
-         * or other pre-frame modifications that need to be made before rendering.
-         */
-        void onPreDrawFrame();
-
-        /**
-         * Render call. Called twice when recording: first for screen display, second for video
-         * file.
-         */
-        void onDrawFrame();
-    }
-
 
     private class ARRenderThread extends Thread implements SurfaceHolder.Callback2 {
 
@@ -533,11 +478,8 @@ public class RecordableSurfaceView extends SurfaceView {
             // guarantee to only report surface as created once GL context
             // associated with the surface has been created, and call on the GL thread
             // NOT the main thread but BEFORE the codec surface is attached to the GL context
-            if (mRendererCallbacksWeakReference != null
-                    && mRendererCallbacksWeakReference.get() != null) {
-
-                mRendererCallbacksWeakReference.get().onSurfaceCreated();
-
+            if (mRenderer != null) {
+                mRenderer.onSurfaceCreated(null, null);
             }
 
             mEGLSurfaceMedia = EGL14
@@ -548,10 +490,9 @@ public class RecordableSurfaceView extends SurfaceView {
 
             mHasGLContext.set(true);
 
-            if (mRendererCallbacksWeakReference != null
-                    && mRendererCallbacksWeakReference.get() != null) {
-                mRendererCallbacksWeakReference.get().onContextCreated();
-            }
+            /*if (mRenderer != null) {
+                mRenderer.onContextCreated();
+            }*/
 
             mLoop.set(true);
 
@@ -577,10 +518,9 @@ public class RecordableSurfaceView extends SurfaceView {
 
                         GLES20.glViewport(0, 0, mWidth, mHeight);
 
-                        if (mRendererCallbacksWeakReference != null
-                                && mRendererCallbacksWeakReference.get() != null) {
-                            mRendererCallbacksWeakReference.get()
-                                    .onSurfaceChanged(mWidth, mHeight);
+                        if (mRenderer != null) {
+                            mRenderer
+                                    .onSurfaceChanged(null, mWidth, mHeight);
                         }
 
                         mSizeChange.set(false);
@@ -589,14 +529,12 @@ public class RecordableSurfaceView extends SurfaceView {
                     if (shouldRender && mEGLSurface != null
                             && mEGLSurface != EGL14.EGL_NO_SURFACE) {
 
-                        if (mRendererCallbacksWeakReference != null
-                                && mRendererCallbacksWeakReference.get() != null) {
-                            mRendererCallbacksWeakReference.get().onPreDrawFrame();
-                        }
+                        /*if (mRenderer != null) {
+                            mRenderer.onPreDrawFrame();
+                        }*/
 
-                        if (mRendererCallbacksWeakReference != null
-                                && mRendererCallbacksWeakReference.get() != null) {
-                            mRendererCallbacksWeakReference.get().onDrawFrame();
+                        if (mRenderer != null) {
+                            mRenderer.onDrawFrame(null);
                         }
 
                         EGL14.eglSwapBuffers(mEGLDisplay, mEGLSurface);
@@ -604,10 +542,9 @@ public class RecordableSurfaceView extends SurfaceView {
                         if (mIsRecording.get()) {
                             EGL14.eglMakeCurrent(mEGLDisplay, mEGLSurfaceMedia, mEGLSurfaceMedia,
                                     mEGLContext);
-                            if (mRendererCallbacksWeakReference != null
-                                    && mRendererCallbacksWeakReference.get() != null) {
+                            if (mRenderer != null) {
                                 GLES20.glViewport(0, 0, mDesiredWidth, mDesiredHeight);
-                                mRendererCallbacksWeakReference.get().onDrawFrame();
+                                mRenderer.onDrawFrame(null);
                                 GLES20.glViewport(0, 0, mWidth, mHeight);
                             }
                             EGL14.eglSwapBuffers(mEGLDisplay, mEGLSurfaceMedia);
@@ -625,10 +562,9 @@ public class RecordableSurfaceView extends SurfaceView {
                 try {
                     Thread.sleep((long) (1f / 60f * 1000f));
                 } catch (InterruptedException intex) {
-                    if (mRendererCallbacksWeakReference != null
-                            && mRendererCallbacksWeakReference.get() != null) {
-                        mRendererCallbacksWeakReference.get().onSurfaceDestroyed();
-                    }
+                    /*if (mRenderer != null) {
+                        mRenderer.onSurfaceDestroyed();
+                    }*/
 
                     if (mEGLDisplay != null) {
                         EGL14.eglMakeCurrent(mEGLDisplay, EGL14.EGL_NO_SURFACE,
